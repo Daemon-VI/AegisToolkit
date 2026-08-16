@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Minimal device-admin policy for Aegis Intruder Watch.
+  We only request `watch-login` so Android delivers onPasswordFailed. No lock, wipe, or
+  password-control policies are requested.
+-->
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-policies>
+        <watch-login />
+    </uses-policies>
+</device-admin>

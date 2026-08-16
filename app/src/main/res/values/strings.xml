@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Aegis</string>
+    <string name="device_admin_desc">Lets Aegis detect failed unlock attempts so it can capture a photo of whoever is trying to get in. It does not lock, wipe, or change your password.</string>
+</resources>
