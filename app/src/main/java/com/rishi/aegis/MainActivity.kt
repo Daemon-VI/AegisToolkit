@@ -29,11 +29,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.rishi.aegis.tools.ApkScreens
+import com.rishi.aegis.tools.BreachScreens
 import com.rishi.aegis.tools.CryptoScreens
+import com.rishi.aegis.tools.HotspotScreens
 import com.rishi.aegis.tools.DeviceScreens
 import com.rishi.aegis.tools.GuardianScreens
 import com.rishi.aegis.tools.NetworkScreens
 import com.rishi.aegis.tools.TermuxScreens
+import com.rishi.aegis.tools.TrafficScreens
+import com.rishi.aegis.tools.VaultScreens
 import com.rishi.aegis.tools.WebScreens
 import com.rishi.aegis.tools.WifiScreens
 import com.rishi.aegis.ui.AegisTheme
@@ -80,8 +85,10 @@ private fun ToolRouter(tool: Tool, onBack: () -> Unit) {
         Tool.DNS -> NetworkScreens.Dns(onBack)
         Tool.WHOIS -> NetworkScreens.Whois(onBack)
         Tool.SUBNET -> NetworkScreens.Subnet(onBack)
+        Tool.TRAFFIC_MON -> TrafficScreens.Monitor(onBack)
         Tool.WIFI_INFO -> WifiScreens.Connection(onBack)
         Tool.WIFI_SCAN -> WifiScreens.Scan(onBack)
+        Tool.HOTSPOT_MON -> HotspotScreens.Monitor(onBack)
         Tool.HTTP_HEADERS -> WebScreens.Headers(onBack)
         Tool.FINGERPRINT -> WebScreens.Fingerprint(onBack)
         Tool.DIR_BRUTE -> WebScreens.DirBrute(onBack)
@@ -92,10 +99,14 @@ private fun ToolRouter(tool: Tool, onBack: () -> Unit) {
         Tool.ENCODER -> CryptoScreens.Encoder(onBack)
         Tool.PW_TOOLS -> CryptoScreens.PasswordTools(onBack)
         Tool.FILE_HASH -> CryptoScreens.FileHash(onBack)
+        Tool.BREACH_CHECK -> BreachScreens.BreachCheck(onBack)
         Tool.TLS_INSPECT -> WebScreens.TlsInspector(onBack)
         Tool.HEADER_AUDIT -> WebScreens.HeaderAudit(onBack)
         Tool.SEC_CHECKUP -> DeviceScreens.SecurityCheckup(onBack)
         Tool.PERM_AUDIT -> DeviceScreens.PermissionAuditor(onBack)
+        Tool.APK_ANALYZE -> ApkScreens.Analyzer(onBack)
+        Tool.TOTP_AUTH -> VaultScreens.Authenticator(onBack)
+        Tool.SECURE_VAULT -> VaultScreens.SecureNotes(onBack)
         Tool.CLI_SETUP -> TermuxScreens.Setup(onBack)
         Tool.CLI_RUN -> TermuxScreens.RunCommand(onBack)
         Tool.CLI_NMAP -> TermuxScreens.Nmap(onBack)

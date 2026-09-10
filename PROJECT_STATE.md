@@ -1,15 +1,31 @@
 # Aegis — Project State
 
-_Last updated: 2026-08-15 (v1.3)_
+_Last updated: 2026-08-16 (v1.4)_
 
 ## What this is
 **Aegis** is a native Android security toolkit app, built for the owner's personal phone
 (Realme RMX3312, Android 15 / API 35, arm64). Single-activity Jetpack Compose app, **no root
 required**. Package `com.rishi.aegis`.
 
-## Status: v1.3 — COMPLETE, installed & verified on device
-Seven tool categories build, install, and run on the physical phone. Verified live via ADB
-screenshots:
+## Status: v1.4.1 — installed & verified on device (31 tools, 9 categories)
+_v1.4.1 adds **Hotspot Monitor** (WIFI) — off-state verified on device; live device-discovery test
+pending (needs owner to enable hotspot + connect a device; ColorOS blocks adb softap-start)._
+
+### v1.4 — COMPLETE, installed & verified on device (30 tools, 9 categories)
+v1.4 adds four features, all built + device-verified via ADB screenshots on 2026-08-16:
+- **Traffic Monitor (flagship)** — no-root packet capture over `VpnService`. TUN established on
+  ColorOS/Android 15 (fd valid), live-parsed 162 real IPv4/UDP/TCP flows (DNS→8.8.8.8:53, TCP→Meta
+  :443), clean teardown restores internet. **Capture-only for now** (packets observed then dropped,
+  no forwarding → no internet while running); forwarding engine is the next step. ✅
+- **Breach Check (HIBP k-anonymity)** — "password" → seen 52,372,427 times; only prefix `5BAA6` left
+  the phone. ✅
+- **App Analyzer** — Instagram: 19 dangerous perms / 69 open exports / signer `5F:3E:50:F4…` / 0
+  trackers (first-party, correct); a casual game: 9 trackers (Firebase, AdMob, Meta, Unity, ironSource,
+  AppLovin, Vungle, InMobi, Pangle). ✅
+- **Authenticator + Secure Vault** — Keystore AES-256-GCM ("Hardware Keystore active"); RFC 6238 TOTP
+  022 333 matched an independent reference exactly. ✅
+
+### v1.3 (still present) — verified earlier:
 - **Device & Privacy (v1.3)** — VERIFIED. **Security Checkup** reads real posture (screen lock set,
   storage encryption active, patch 2026-06-01, Android 15, no root, correctly flags Developer
   options + USB debugging ON). **Permission Auditor** lists real apps by permission (Camera held by
@@ -31,10 +47,19 @@ screenshots:
   captured back in-app. Connection test returned `aegis-ok / aarch64 / exit 0`. ✅
 - Dashboard navigation, scroll, back handling, dark theme. ✅
 
-## Toolset (25 tools)
+## Toolset (30 tools)
 - **Network & Recon:** Network Info, Host Discovery (ping sweep), Port Scanner (TCP connect),
   Ping (system ICMP binary), DNS Lookup (raw UDP, A/AAAA/CNAME/MX/NS/TXT/SOA/PTR), WHOIS, Subnet Calculator.
-- **Wi-Fi:** Connection Details (SSID/BSSID/RSSI/channel/band), Nearby Networks scan (signal meter).
+- **Traffic (v1.4):** Traffic Monitor — no-root live IP-packet capture over VpnService (per-flow
+  proto/endpoints/size). Capture-only prototype; forwarding engine pending.
+- **Passwords & Hashing (v1.4 addition):** Breach Check — HIBP Pwned-Passwords via k-anonymity.
+- **Device & Privacy (v1.4 addition):** App Analyzer — dangerous perms, exported components, signer
+  SHA-256 (+ debug-key flag), and third-party trackers (35-signature offline DB).
+- **Vault & 2FA (v1.4):** Authenticator (RFC 6238 TOTP, seeds encrypted in Keystore), Secure Vault
+  (AES-256-GCM notes under a hardware Keystore key).
+- **Wi-Fi:** Connection Details (SSID/BSSID/RSSI/channel/band), Nearby Networks scan (signal meter),
+  Hotspot Monitor (v1.4.1 — detects own SoftAP, lists connected devices via subnet sweep + MAC/vendor,
+  shows hotspot data in/out from /proc/net/dev; no per-client content without root).
 - **Web:** HTTP Headers, Tech Fingerprint, Directory Brute-Force, Request Builder.
 - **Passwords & Hashing:** Hash Generator, Hash Identifier, Dictionary Cracker, Encoder/Decoder
   (Base64/Hex/URL/ROT13), Password Tools (strength meter + generator), File Hash (SAF-pick a file →
@@ -85,7 +110,7 @@ cd C:/Users/Rishi/AegisToolkit
 adb -s ac1b21b1 install -r app/build/outputs/apk/debug/app-debug.apk
 adb -s ac1b21b1 shell am start -n com.rishi.aegis/.MainActivity
 ```
-Shareable APK staged at repo root: `Aegis-v1.3-debug.apk` (debug-signed, installs on any Android 8+).
+Shareable APK staged at repo root: `Aegis-v1.4-debug.apk` (debug-signed, installs on any Android 8+).
 
 ## Environment (this machine)
 - Android SDK: `C:\Android\Sdk` (platforms android-36/37, build-tools 36/37, NDK 28.2)

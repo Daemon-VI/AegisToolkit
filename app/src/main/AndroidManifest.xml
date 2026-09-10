@@ -28,6 +28,10 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-feature android:name="android.hardware.camera.front" android:required="false" />
 
+    <!-- Traffic Monitor: no-root packet capture over a local VpnService -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <queries>
         <package android:name="com.termux" />
     </queries>
@@ -71,6 +75,20 @@
             android:name=".core.IntruderService"
             android:exported="false"
             android:foregroundServiceType="camera" />
+
+        <!-- Traffic Monitor: VpnService that captures IP packets off a local TUN interface -->
+        <service
+            android:name=".core.CaptureVpnService"
+            android:exported="false"
+            android:permission="android.permission.BIND_VPN_SERVICE"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="On-device network traffic capture and analysis for the user's own device" />
+            <intent-filter>
+                <action android:name="android.net.VpnService" />
+            </intent-filter>
+        </service>
 
         <!-- Shares captured photos out via the system share sheet -->
         <provider

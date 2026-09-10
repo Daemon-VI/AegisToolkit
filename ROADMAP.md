@@ -1,5 +1,67 @@
 # Aegis — Roadmap
 
+## v1.4.1 — Hotspot Monitor (2026-08-16)
+New WIFI tool `HOTSPOT_MON` — watch the phone's own Wi-Fi hotspot, no root.
+- `core/Hotspot.kt` (+ inline OUI table), `tools/HotspotScreens.kt`.
+- Detects the SoftAP by enumerating NetworkInterface for the site-local IPv4 that isn't the cellular
+  upstream (SoftAP iface = ap0/wlan1/swlan0, gateway ~192.168.x.1). Reads total data in/out from
+  `/proc/net/dev` (confirmed world-readable on this ColorOS build). Discovers connected devices by
+  sweeping the AP subnet (reuses `NetEngine.pingSweep`), enriches with MAC+vendor from `/proc/net/arp`
+  (best-effort — may be empty on Android 15) and flags randomized/private MACs (locally-administered
+  bit). Honest limit stated in-UI: per-device *traffic content* needs root (tethered traffic is routed
+  below the app sandbox; even our VpnService only sees this phone).
+- OFF-STATE VERIFIED on device: detectAp()→null with hotspot off, shows the warning + Refresh + Open
+  hotspot settings. **Live device-discovery test still pending** — needs the owner to enable the
+  hotspot + connect a device (ColorOS blocks `cmd wifi start-softap` from adb, uid 2000).
+
+## v1.4 — IN PROGRESS (started 2026-08-16)
+Four features approved: **Traffic Monitor** (no-root packet capture), **HIBP breach check**,
+**offline APK/tracker analyzer**, **Keystore vault + TOTP**. Approach: prototype the flagship first.
+
+### Flagship: Traffic Monitor (VpnService packet capture) — PROTOTYPE VERIFIED ✅
+De-risk succeeded on the real phone (Realme RMX3312, Android 15 / ColorOS). Proven end-to-end:
+- `VpnService.prepare()` consent dialog appears and works on ColorOS (shell `appops`/`pm grant`
+  are blocked here as usual, so consent must be a real user tap — it is).
+- `establish()` returns a valid TUN fd; the read loop parses real IPv4/IPv6 + TCP/UDP flows.
+- Live capture verified: 162 packets, 81.6 KB, correct proto chips + src→dst:port + lengths in the
+  UI (DNS to 8.8.8.8:53, TCP/UDP to Meta on :443). Stop tears the tunnel down cleanly and restores
+  internet (`connectivity` shows NOT_VPN again).
+- Files: `core/PacketParser.kt`, `core/TrafficCapture.kt`, `core/CaptureVpnService.kt`,
+  `tools/TrafficScreens.kt`; manifest service + FGS specialUse; Tool `TRAFFIC_MON` / Category `TRAFFIC`.
+
+**PROTOTYPE LIMITATION (by design):** capture-only. Packets are observed then dropped — no
+forwarding — so the device has no internet while the monitor runs. Next step to make it a real
+always-on monitor:
+- Userspace forwarding: a TCP proxy (per-flow socket, `protect()` it, splice via the TUN) + a UDP
+  relay (esp. DNS on :53). This is the hard part; PCAPdroid/tun2socks are the reference designs.
+- Then layer on: per-app attribution (`ConnectivityManager.getConnectionOwnerUid`), domain logging,
+  a block-list firewall, and `.pcap` export.
+
+### Remaining v1.4 (cheap-and-robust wins, no VPN dependency)
+- **HIBP breach check** — DONE & VERIFIED ✅ (2026-08-16). k-anonymity: SHA-1 the password, send
+  only the 5-char prefix (`Add-Padding: true`), match the suffix locally. On-device test: "password"
+  → "Found in breaches, seen 52,372,427 times", panel shows only prefix `5BAA6` left the phone.
+  Files: `core/Breach.kt`, `tools/BreachScreens.kt`; Tool `BREACH_CHECK` under Category CRYPTO.
+- **Offline APK/tracker analyzer** — DONE & VERIFIED ✅ (2026-08-16). Parses manifest: dangerous
+  perms (via protectionLevel), exported components (unguarded flagged), signer SHA-256 (+ debug-key
+  detection), and trackers via a bundled 35-signature DB matched against declared component classes.
+  On-device: Instagram → 19 dangerous perms / 69 open exports / 0 trackers (first-party, correct);
+  "2 Player Games" → 9 trackers (Firebase, AdMob, Meta, Unity, ironSource, AppLovin, Vungle, InMobi,
+  Pangle). Files: `core/ApkAnalyzer.kt`, `core/Trackers.kt`, `tools/ApkScreens.kt`; Tool `APK_ANALYZE`
+  under DEVICE. Note: list load can take ~2s on 200+ apps; brief "0 apps" until LaunchedEffect fills.
+- **Keystore vault + TOTP** — DONE & VERIFIED ✅ (2026-08-16). AES-256-GCM under an AndroidKeystore
+  key (hardware-backed; "Hardware Keystore active" badge confirmed on device). TOTP is RFC 6238
+  (HMAC-SHA1, 6 digits, 30s). On-device: secret JBSWY3DPEHPK3PXP → code 022 333, which matches an
+  independent reference TOTP for the same epoch exactly — and the seed round-tripped through Keystore
+  encryption. Files: `core/Totp.kt`, `core/Vault.kt`, `tools/VaultScreens.kt`; Tools `TOTP_AUTH` +
+  `SECURE_VAULT` under new Category SECURE ("Vault & 2FA").
+
+## v1.4 status: all 4 approved features SHIPPED & device-verified (2026-08-16)
+Remaining flagship work (deferred, was the plan's "then forwarding" phase): the Traffic Monitor is
+still capture-only. To make it a real always-on monitor/firewall, build the userspace forwarding
+engine (TCP proxy + UDP/DNS relay via `protect()`), then per-app attribution, domain log, block-list
+firewall, and PCAP export. See the flagship section above.
+
 ## v1.3 — Device & Privacy + Web security — DONE
 Shipped & verified on device: **Security Checkup** (posture), **Permission Auditor** (apps by
 sensitive permission + special access), **TLS/Cert Inspector**, **Security Headers** grader, and

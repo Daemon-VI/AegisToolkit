@@ -11,8 +11,8 @@ android {
         applicationId = "com.rishi.aegis"
         minSdk = 26
         targetSdk = 35
-        versionCode = 3
-        versionName = "1.3"
+        versionCode = 5
+        versionName = "1.4.1"
     }
 
     buildTypes {
